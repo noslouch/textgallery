@@ -1,0 +1,9 @@
+.blind {
+    opacity: 0;
+    transition: opacity 150ms;
+}
+
+.blind.opened {
+    opacity: 1;
+}
+
