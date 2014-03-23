@@ -6,8 +6,35 @@
     <link rel="stylesheet" href="style.css" />
     
     <script type="text/javascript" src="custom.modernizr.js"></script>
+    <style>
+        *, *:before, *:after {
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        header {
+            height: 100px;
+            background: hsl(155, 75%, 50%);
+        }
+        header .wrapper {
+            width: 50%;
+            float: left;
+        }
+        button {
+            margin: 15px;
+            height: 25px;
+            font-size: 1rem;
+            width: auto;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="wrapper">
+            <button id="play" type="button">Play Gallery</button>
+            <button id="pause" type="button">Pause Gallery</button>
+        </div>
+    </header>
 
     <div class="quotes" id="quotes">
         <div class="container" id="qContainer">
@@ -28,8 +55,8 @@
 
             <div class="slide">
                 <h3 class="image">
-                    <img class="blind" src="http://pa.dev/assets/home-slides/541/letter__slide.jpg" title="Letter Screenshot">
-                    <a href="http://google.com" class="blind back" target="_blank">Buttton</a>
+                    <div class="blind"><img src="http://pa.dev/assets/home-slides/541/letter__slide.jpg" title="Letter Screenshot"></div>
+                    <div class="blind"><a href="http://google.com" class="back" target="_blank">Buttton</a></div>
                 </h3>
             </div> <!--slide-->
 
@@ -39,7 +66,7 @@
                     <div class="blind"> launching the company.</div>
                     <div class="blind"></div>
                     <div class="blind">— Donna Karan</div>
-                    <a href="http://70.32.107.106/projects#filter=.dkny&amp;view=cover" class="blind back">View DKNY Projects</a>
+                    <div class="blind"><a href="http://70.32.107.106/projects#filter=.dkny&amp;view=cover" class="back">View DKNY Projects</a></div>
                 </h3>
             </div> <!--slide-->
 
@@ -64,8 +91,17 @@
     
     <script type="text/javascript" src="textgallery.js"></script>
     <script>
-        // var c = document.getElementById('quotes'),
-        //     g = new Gallery(c)
+        var g = new Gallery(document.getElementById('quotes')),
+            play = document.getElementById('play'),
+            pause = document.getElementById('pause')
+
+        document.addEventListener('click', function(e) {
+            if ( e.target.id === 'play' ) {
+                g.play()
+            } else if ( e.target.id === 'pause' ) {
+                g.pause()
+            }
+        })
     </script>
 </body>
 </html>

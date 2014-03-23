@@ -1,54 +1,99 @@
 /*global Modernizr,Event*/
 'use strict';
 
-var openslide = new CustomEvent('openslide', { bubbles: true  })
 
 function Slide(h3, gallery){
     var transEndEventName,
-        transEndEventNames
+        transEndEventNames,
+        blinds = [],
+        el = h3,
+        currentTimer,
+        state = 'closed'
 
-    this.blinds = []
-    this.el = h3
-
-    Array.prototype.forEach.call( this.el.children, function(el) {
-        if ( el.innerHTML === '*' ) {
+    Array.prototype.forEach.call( el.children, function(el) {
+        if ( el.nodeName !== 'DIV' || !el.classList.contains('blind') ) {
+            throw new Error('Blinds must be wrapped in a <div /> of class blind')
+        } else if ( el.innerHTML === '*' ) {
             el.innerHTML = ''
         }
-        this.blinds.push( el )
+        el.classList.add('closed')
+        blinds.push( el )
     }, this)
 
-    this.open = function(blindIndex){
-        if ( blindIndex === this.blinds.length ) {
-            return
-        } else if ( blindIndex === undefined ) {
+    function open(blindIndex){
+        if ( blindIndex === undefined ) {
             blindIndex = 0
         }
 
-        this.blinds[blindIndex].classList.add('opened')
-        setTimeout(this.open.bind(this, blindIndex+1), 110)
+        state = 'opening'
+        blinds[blindIndex].classList.add('opened')
+        blinds[blindIndex].classList.remove('closed')
+        blindIndex++
+
+        if ( blindIndex === blinds.length ) {
+            state = 'open'
+            return
+        } else {
+            // 200 ms seems to be the interval floor, otherwise the event handler doubles up
+            currentTimer = setTimeout( function() {
+                open( blindIndex )
+            }, 200 )
+        }
     }
 
-    this.close = function(blindIndex){
-        if ( blindIndex === this.blinds.length ) {
-            return
-        } else if ( blindIndex === undefined ) {
+    function close(blindIndex){
+        if ( blindIndex === undefined ) {
             blindIndex = 0
         }
 
-        this.blinds[blindIndex].classList.remove('opened')
-        setTimeout(this.close.bind(this, blindIndex+1), 110)
+        state = 'closing'
+        blinds[blindIndex].classList.remove('opened')
+        blinds[blindIndex].classList.add('closed')
+        blindIndex++
+
+        if ( blindIndex === blinds.length ) {
+            state = 'closed'
+            return
+        } else {
+            // 200 ms seems to be the interval floor, otherwise the event handler doubles up
+            currentTimer = setTimeout( function() {
+                close( blindIndex )
+            }, 200 )
+        }
     }
 
-    this.getBlinds = function() {
-        return this.blinds
+    function pause() {
+        clearTimeout( currentTimer )
+        switch (state) {
+            case 'opening':
+                return el.querySelector('.closed')
+                break;
+            case 'open':
+            case 'closing':
+                return el.querySelector('.opened')
+                break;
+            case 'closed':
+                return false
+                break;
+            default:
+                throw new Error('.pause() error.')
+        }
     }
 
-    this.getBlind = function(n){
-        return this.blinds[n-1]
+    function getBlinds() {
+        return blinds
     }
 
-    this.lastBlind = function(){
-        return this.blinds[this.blinds.length-1]
+    function getBlind(n){
+        return blinds[n]
+    }
+
+    function lastBlind(){
+        return blinds[blinds.length-1]
+    }
+
+    function getEl(){
+        return el
     }
 
     transEndEventNames = {
@@ -57,216 +102,192 @@ function Slide(h3, gallery){
         'transition'       : 'transitionend'       // IE10, Opera, Chrome, FF 15+, Saf 7+
     }
 
-    transEndEventName = transEndEventNames[ Modernizr.prefixed('transition') ];
+    transEndEventName = transEndEventNames[Modernizr.prefixed('transition')]
 
     function blindHandler(e) {
+        /*jshint validthis:true*/
         if ( e.target.nodeName === 'DIV' &&
              e.target.classList.contains('blind') ) {
-            if ( this.opened ) {
+
+            if ( blinds.length === el.querySelectorAll('.opened').length ) {
+                el.dispatchEvent( new Event('openslide', { bubbles : true }) )
                 e.stopImmediatePropagation()
-            } else if ( this.blinds.length === this.el.querySelectorAll('.opened').length ) {
-                this.opened = true
-                this.el.dispatchEvent(openslide)
+            } else if ( blinds.length === el.querySelectorAll('.closed').length ) {
+                el.dispatchEvent( new Event('closeslide', { bubbles : true }) )
+                e.stopImmediatePropagation()
             }
+
         }
     }
 
-    this.el.addEventListener(transEndEventName, blindHandler.bind(this), false)
+    el.addEventListener(transEndEventName, blindHandler.bind(this), false)
 
+    return {
+        getBlinds : getBlinds.bind(this),
+        getBlind : getBlind.bind(this),
+        lastBlind : lastBlind.bind(this),
+        open : open.bind(this),
+        close : close.bind(this),
+        getEl : getEl.bind(this),
+        pause : pause.bind(this)
+    }
 }
 
-
-
-Slide.prototype.animate = function(){
-    console.log('calling animate on:', this)
-
-    this.g.openSlide = this
-    setTimeout(this.staggerClose, 4500)
-    this.staggerOpen()
-    this.el.classList.remove('closed')
-}
-
-function Gallery(c){
+/** Gallery constructor
+ * @constructor
+ */
+function Gallery(c) {
     var quotes = c.getElementsByTagName('h3'),
+        isPlaying = false,
+        currentIndex,
+        nextIndex,
+        currentSlide,
+        nextSlide,
+        el = c,
+        currentTimer,
         pos,
         li,
         i,
         dotHandler,
         galleryHandler,
         transEndEventName,
-        transEndEventNames
+        transEndEventNames,
+        slides = [],
+        q = [],
+        resumeFromBlindEl,
+        resumeFromBlindIndex
 
-    // Slides array for reference
-    this.slides = []
+    Array.prototype.forEach.call( quotes, function(slide) {
+        slides.push( new Slide(slide) )
+    } )
 
-    // Animation Queue
-    this.q = []
+    function slideHandler(e) {
+        currentIndex = getSlideIndex(e.target)
+        nextIndex = currentIndex + 1 === getSlides().length ? 0 : currentIndex + 1
+        currentSlide = getSlide(currentIndex)
+        nextSlide = getSlide(nextIndex)
+
+        if (e.type === 'openslide') {
+            currentTimer = setTimeout(function() {
+                currentSlide.close()
+            }, 1000)
+        } else if ( e.type === 'closeslide' ) {
+            currentTimer = setTimeout(function() {
+                nextSlide.open()
+            }, 1000)
+        }
+    }
+
+    el.addEventListener('openslide', slideHandler, false)
+    el.addEventListener('closeslide', slideHandler, false)
+
+    function setCurrents() {
+        nextIndex = currentIndex + 1 === getSlides().length ? 0 : currentIndex + 1
+        currentSlide = getSlide(currentIndex)
+        nextSlide = getSlide(nextIndex)
+    }
+
+    /**
+     * Play the gallery.
+     * This method is used to start playing the first time the Gallery loads as
+     * well as after calls to {@link Gallery~pause} .pause().
+     * Plays from the first slide by default. Optionall include a zero-indexed
+     * slide number to start playing from a different slide.
+     * @param {string} [index=0] - Begin playing from the slide at the given index
+     */
+    function play(index){
+        var method
+
+        if ( isPlaying ) {
+            return 'Already playing.'
+        }
+        isPlaying = true
+
+        if ( currentIndex !== undefined && !index ) {
+            // resuming from a pause
+            if ( !resumeFromBlindEl ) {
+                // current slide is already closed
+                // open nextSlide from beginning
+                nextSlide.open()
+            } else {
+                resumeFromBlindIndex = currentSlide.getBlinds().indexOf(resumeFromBlindEl)
+
+                if ( resumeFromBlindEl.classList.contains('closed') ) {
+                    currentSlide.open(resumeFromBlindIndex)
+                } else {
+                    currentSlide.close(resumeFromBlindIndex)
+                }
+            }
+        } else if ( index !== undefined && !currentIndex ) {
+            // initial play; choosing a starting slide
+            currentIndex = index
+            setCurrents()
+            getSlide(index).open()
+        } else if ( !index && !currentIndex ) {
+            // intial play; default from slide at position 0
+            currentIndex = index = 0
+            setCurrents()
+            getSlide(index).open()
+        } else {
+            throw new Error('.play() error')
+        }
+    }
+
+    /**
+     * Pauses the gallery at the current slide
+     */
+    function pause(){
+        clearTimeout(currentTimer)
+        resumeFromBlindEl = currentSlide.pause()
+        isPlaying = false
+    }
+
+    function getEl(){
+        return el
+    }
+
+    function getSlideIndex(slide) {
+        if ( slide instanceof Element ) {
+            return Array.prototype.indexOf.call(quotes, slide)
+        } else {
+            return slides.indexOf(slide)
+        }
+    }
 
 
-    // for ( i = 0; i < quotes.length; i++ ){
-    //     this.slides.push( new Slide(quotes[i], self) )
-    //     this.q.push(i)
-    // }
+    function getSlide(index) {
+        return slides[index]
+    }
 
-    // dotHandler = function(dot){
-    //     // get current li based on front of queue
-    //     li = self.els[self.q[0]]
+    function getSlides() {
+        return slides
+    }
 
-    //     Array.prototype.forEach.call(self.els, function(el) {
-    //         el.classList.remove('active-slide')
-    //     })
-    //     li.classList.add('active-slide')
-    //     pos = li.offsetLeft
-    //     var p = $(li).addClass('active-slide').position()
-    //     $('#dot').animate({
-    //         left: p.left
-    //     })
-    // }
+    function getCurrentSlide() {
+        return currentSlide
+    }
 
-    // galleryHandler = function(e){
-    //     // console.log('tranitionend handler')
-    //     if ( e.target.nodeName.toLowerCase() === 'a' &&
-    //             !e.target.classList.contains('back') ||
-    //             e.target.id === 'bullets' ) {
-    //         // console.log('do nothing')
-    //         return 
-    //     }
-    //     // console.log('check slides')
-    //     var openSlide = self.getCurrent(),
-    //         lastBlind = openSlide.lastBlind(),
-    //         thirdFromEnd = openSlide.getBlind(openSlide.blinds.length-1),
-    //         currentBlind = e.target
+    function getCurrentSlideIndex() {
+        return getSlideIndex(getCurrentSlide())
+    }
 
-    //     if ( ( self.getCurrent().blinds.length === 1 && $(openSlide.blinds[0]).hasClass('closed') ) ||
-    //          currentBlind === thirdFromEnd && $(thirdFromEnd).hasClass('closed') ) {
-    //         if (self.q.userChoice){
-    //             // userChoice flags when the user selects a specific slide
-    //             // the flag notifies us to override the typical update operation,
-    //             // which would just load whatever is sequentially next.
-    //             self.getNext().animate()
-    //             self.q.userChoice = false
-    //             openSlide.$el.addClass('closed')
-    //         } else {
-    //             // otherwise call update(), which updates the queue with the
-    //             // following slide in sequential order
-    //             //
-    //             // there's probably a way to refactor this so we can respect
-    //             // user choices without needing to force an override.
-    //             // console.log('need to grab next slide in queue and start animation')
-    //             self.update().animate()
-    //             openSlide.$el.addClass('closed')
-    //         }
-    //         dotHandler()
-    //     }
-    // }
-
-    // transEndEventNames = {
-    //     'WebkitTransition' : 'webkitTransitionEnd',// Saf 6, Android Browser
-    //     'MozTransition'    : 'transitionend',      // only for FF < 15
-    //     'transition'       : 'transitionend'       // IE10, Opera, Chrome, FF 15+, Saf 7+
-    // }
-    // transEndEventName = transEndEventNames[ Modernizr.prefixed('transition') ];
-
-    // c.addEventListener(transEndEventName, galleryHandler, false)
-    // // $(c).on(transEndEventName, galleryHandler)
-    // // $(c).on('transitionend', galleryHandler)
-    // // $(c).on('webkitTransitionEnd', galleryHandler)
-    // // $(c).on('transitionEnd', galleryHandler)
-
-    // //$(c).on('click', '.indicators a', function(e){
-    // c.addEventListener('click', function(e) {
-    //     if ( e.target.tagName.toLowerCase() === 'a' && e.target.parent.classList.contains('indicators') ) {
-    //         e.preventDefault()
-    //         self.update(e.target.id)
-    //         dotHandler()
-    //     }
-    // })
+    // start()
 
     return {
-        init : function() {
-            // var ul = document.createElement('ul'),
-            //     dot = document.createElement('div'),
-            //     bullets = document.getElementById('bullets'),
-            //     i,
-            //     li,
-            //     a
-
-            // dot.setAttribute('id','dot')
-            // dot.classList.add('dot')
-
-            // ul.appendChild(dot)
-
-            // for (i = 0; i < this.slides.length; i++){
-            //     li = document.createElement('li')
-            //     if (i === 0) {
-            //         li.classList.add('active-slide')
-            //     }
-            //     a = document.createElement('a')
-            //     a.setAttribute('id', i) 
-            //     li.appendChild(a)
-            //     ul.appendChild(li)
-            // }
-            // bullets.appendChild(ul)
-
-            // // Slide bullets
-            // this.els = bullets.getElementsByTagName('li') 
-
-            this.getCurrent().animate()
-        },
+        getEl : getEl.bind(this),
+        getCurrentSlide : getCurrentSlide.bind(this),
+        getCurrentSlideIndex : getCurrentSlideIndex.bind(this),
         destroy : function() {},
-        start : function() {},
-        stop : function() {},
+        play : play.bind(this),
+        pause : pause.bind(this),
         next : function() {},
         prev : function() {},
         goTo : function() {},
+        getSlide : getSlide.bind(this),
+        getSlides : getSlides.bind(this),
+        getSlideIndex : getSlideIndex.bind(this),
+        isPlaying : function() {
+            return isPlaying
+        }
     }
-}
-
-Gallery.prototype.getCurrent = function(){
-    return this.openSlide || this.slides[0]
-}
-
-Gallery.prototype.getNext = function(){
-    if (this.openSlide) {
-        return this.slides[this.q[0]]
-    } else {
-        return this.slides[1]
-    }
-}
-
-Gallery.prototype.update = function(){
-    if (arguments.length < 1) {
-        // console.log('calling update')
-        // move closed slide to end of queue
-        // next slide to open moves to first position
-        var justClosed = this.q.shift()
-        this.q.push(justClosed)
-    } else {
-        // move user selected slide to first position
-        var nextIndex = parseInt(arguments[0], 10)
-        var end = this.q.splice(0, this.q.indexOf(nextIndex))
-        this.q = this.q.concat(end)
-        // userChoice flag to override standard update calls
-        this.q.userChoice = true
-    }
-    // next slide, either standard sequence or user-selected is in q[0]
-    return this.slides[this.q[0]]
-}
-
-Gallery.prototype.getQueue = function(){
-    return this.q
-}
-
-Gallery.prototype.init = function(){
-}
-
-function checkQuoteHeight(){
-    var quotes = document.getElementById('quotes')
-
-    function inspect() {
-        quotes.classList.toggle( 'small', quotes.clientHeight < 370 )
-        setTimeout(inspect, 150)
-    }
-
-    inspect()
 }
