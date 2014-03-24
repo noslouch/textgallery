@@ -5,28 +5,10 @@
     <title></title>
     <link rel="stylesheet" href="style.css" />
     
+    <!--[if lte IE 9]>
+    <script type="text/javascript" src="shims/classlist.js"></script>
+    <![endif] -->
     <script type="text/javascript" src="custom.modernizr.js"></script>
-    <style>
-        *, *:before, *:after {
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-        }
-        header {
-            height: 100px;
-            background: hsl(155, 75%, 50%);
-        }
-        header .wrapper {
-            width: 50%;
-            float: left;
-        }
-        button {
-            margin: 15px;
-            height: 25px;
-            font-size: 1rem;
-            width: auto;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -36,10 +18,11 @@
         </div>
     </header>
 
-    <div id="container">
+    <div id="container" class="container">
         <div class="slide">
             <div class="blind">Winter is coming</div>
             <div class="blind">- Eddard Stark</div>
+            <div class="blind"><a href="http://yahoo.com">A link</a></div>
         </div>
         <div class="slide">
             <div class="blind">In the game of thrones,</div>
