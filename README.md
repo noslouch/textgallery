@@ -62,6 +62,14 @@ Just initialize the Gallery constructor like so:
     gallery.pause() // pause the animation at the current slide and blind
     gallery.play() // resume playing from where you left off
 
+Browser Compatibility
+---------------------
+
+- **IE 9+**
+- **Firefox 16+**
+- **Safari 6+**
+- **Chrome 26+**
+
 Known Bugs
 ----------
 
