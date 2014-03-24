@@ -8,7 +8,7 @@ texts.
 Most carousel plugins work best with images, so here's one that works best with
 lines of text. Hooray!
 
-## [View the docs](http://noslouch.github.io/textgallery)
+#### [View the docs](http://noslouch.github.io/textgallery)
 
 Highlights
 ----------
