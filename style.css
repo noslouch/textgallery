@@ -1,4 +1,49 @@
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+header {
+    overflow: auto;
+    background: hsl(155, 75%, 50%);
+}
+
+header .wrapper {
+    width: 50%;
+    float: left;
+}
+
+button {
+    margin: 15px;
+    height: 25px;
+    font-size: 1rem;
+    width: auto;
+}
+.container {
+    position: relative;
+    height: 500px;
+}
+.slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 50px;
+    z-index: -1; /* create a new stacking context for each set of blinds */
+}
+
+.slide.opened {
+    z-index: 0;
+}
+
 .blind {
+    font-family: Helvetica;
+    font-size: 2rem;
     opacity: 0;
     transition: opacity 150ms;
 }
