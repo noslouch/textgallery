@@ -63,6 +63,14 @@ function Slide(node){
 
         if ( blindIndex === blinds.length ) {
             state = 'open'
+            if ( !transEndEventName ) {
+                // ie 9 does not support transitionEnd
+                // trigger next event manually
+                el.classList.add('opened')
+                var openslide = document.createEvent('Event')
+                openslide.initEvent( 'openslide', true, true )
+                el.dispatchEvent( openslide )
+            }
             return
         } else {
             // 200 ms seems to be the interval floor, otherwise the event handler doubles up
@@ -91,6 +99,14 @@ function Slide(node){
 
         if ( blindIndex === blinds.length ) {
             state = 'closed'
+            if ( !transEndEventName ) {
+                // ie 9 does not support transitionEnd
+                // trigger next event manually
+                el.classList.remove('opened')
+                var closeslide = document.createEvent( 'Event' )
+                closeslide.initEvent( 'closeslide', true, true )
+                el.dispatchEvent( closeslide )
+            }
             return
         } else {
             // 200 ms seems to be the interval floor, otherwise the event handler doubles up
@@ -177,32 +193,57 @@ function Slide(node){
     }
 
     /**
-     * TransitionEnd event handler. Determines when all blinds are closed/open 
+     * TransitionEnd event handler. Determines when all blinds are closed/open
      * and broadcasts appropriate event.
+     * Toggles opened class on el to adjust stacking order.
      * @param {Event} e - Event object
      * @fires Slide#openslide
      * @fires Slide#closeslide
      */
-    function blindHandler(e) {
+    function blindHandler(e, ie9) {
         if ( e.target.nodeName === 'DIV' &&
              e.target.classList.contains('blind') ) {
 
             if ( blinds.length === el.querySelectorAll('.opened').length ) {
+                el.classList.add('opened')
+                e.stopImmediatePropagation()
+
                 /**
                  * Openslide event. Fired when all blinds in this slide are now open.
                  * @event Slide#openslide
                  * @type {object}
                  */
-                el.dispatchEvent( new Event('openslide', { bubbles : true }) )
-                e.stopImmediatePropagation()
+                // < ie11 uses deprecated event create-init-dispatch process
+                // catch appropriate error and do re-dispatch
+                try {
+                    el.dispatchEvent( new Event('openslide', { bubbles : true }) )
+                } catch(error) {
+                    if ( error.name === "TypeError" && error.description === "Object doesn't support this action" ) {
+                        var openslide = document.createEvent('Event')
+                        openslide.initEvent( 'openslide', true, true )
+                        el.dispatchEvent( openslide )
+                    }
+                }
             } else if ( blinds.length === el.querySelectorAll('.closed').length ) {
+                el.classList.remove('opened')
+                e.stopImmediatePropagation()
+
                 /**
                  * Closeslide event. Fired when all blinds in this slide are now closed.
                  * @event Slide#closeslide
                  * @type {object}
                  */
-                el.dispatchEvent( new Event('closeslide', { bubbles : true }) )
-                e.stopImmediatePropagation()
+                // < ie11 uses deprecated event create-init-dispatch process
+                // catch appropriate error and do re-dispatch
+                try {
+                    el.dispatchEvent( new Event('closeslide', { bubbles : true }) )
+                } catch(error) {
+                    if ( error.name === "TypeError" && error.description === "Object doesn't support this action" ) {
+                        var closeslide = document.createEvent( 'Event' )
+                        closeslide.initEvent( 'closeslide', true, true )
+                        el.dispatchEvent( closeslide )
+                    }
+                }
             }
 
         }

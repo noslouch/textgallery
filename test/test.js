@@ -101,6 +101,7 @@ test('Slide API', function(){
     var i,
         allBlinds
 
+    g.destroy()
     deepEqual( slides[0].querySelectorAll('.blind')[slides[0].querySelectorAll('.blind').length - 1], slideObj.lastBlind(), 'lastBlind returns last blind')
 
     equal( slides[0].querySelectorAll('.blind').length, slideObj.getBlinds().length )
@@ -190,7 +191,8 @@ asyncTest('Slide sends close event', function(){
 })
 
 asyncTest('All Slides send close event once per transition', function(){
-    g.destroy()
+    window.g.destroy()
+    window.g = null
     expect(1)
     var closedSlides = 0,
         slideObjs = []
