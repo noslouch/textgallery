@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Textgallery by noslouch</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/noslouch/textgallery">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Textgallery</h1>
+            <h2>A no-dependency slideshow for quotes and other text</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/noslouch/textgallery/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/noslouch/textgallery/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>
+<a name="textgalleryjs" class="anchor" href="#textgalleryjs"><span class="octicon octicon-link"></span></a>textgallery.js</h1>
+
+<p>One morning, one may wake up to a requirement for using text in a slideshow, 
+like quotes about how great your website is or inspiring passages from ancient
+texts. </p>
+
+<p>Most carousel plugins work best with images, so here's one that works best with
+lines of text. Hooray!</p>
+
+<h2>
+<a name="highlights" class="anchor" href="#highlights"><span class="octicon octicon-link"></span></a>Highlights</h2>
+
+<ul>
+<li>No dependencies<a href="#requirements">*</a>
+</li>
+<li>Lightweight</li>
+<li>Selectable text</li>
+<li>Slick test transitions</li>
+<li>Basic, easy-to-overwrite CSS</li>
+<li>Comes with a test suite if you want to extend or modify the source</li>
+</ul><h2>
+<a name="jquery-not-required" class="anchor" href="#jquery-not-required"><span class="octicon octicon-link"></span></a><a name="requirements">jQuery Not Required</a>
+</h2>
+
+<p>But you will need ES5, which should be pretty standard by now. Sorry if that
+doesn't work for you.</p>
+
+<p>Full browser compatability table coming soon.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Textgallery works like a standard image gallery, with the addition of the notion
+of <strong>blinds</strong>.</p>
+
+<p>A parent container holds one or more slides. Each slide contains one or more
+<strong>blinds</strong>. Think of a blind as a line of text. You'll need to figure out a way
+to manage line breaks to work with your design.</p>
+
+<p>Here's the sample DOM structure that textgallery works with.</p>
+
+<pre><code>&lt;div id="container"&gt;
+    &lt;div class="slide"&gt;
+        &lt;div class="blind"&gt;Winter is coming&lt;/div&gt;
+        &lt;div class="blind"&gt;- Eddard Stark&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="slide"&gt;
+        &lt;div class="blind"&gt;In the game of thrones,&lt;/div&gt;
+        &lt;div class="blind"&gt;you win or you die.&lt;/div&gt;
+        &lt;div class="blind"&gt;- Cersei Lannister&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="slide"&gt;
+        &lt;div class="blind"&gt;All these quotes and more&lt;/div&gt;
+        &lt;div class="blind"&gt;available for a limited time only!&lt;/div&gt;
+        &lt;div class="blind"&gt;&lt;a href="google.com"&gt;Click here for more&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>Just initialize the Gallery constructor like so: </p>
+
+<pre><code>var gallery = new Gallery(document.getElementById('container'))
+gallery.play() // start from the beginning
+gallery.play(2) // start playing from the slide at index 2
+gallery.pause() // pause the animation at the current slide and blind
+gallery.play() // resume playing from where you left off
+</code></pre>
+
+<h2>
+<a name="known-bugs" class="anchor" href="#known-bugs"><span class="octicon octicon-link"></span></a>Known Bugs</h2>
+
+<p><strong>Coming Soon.</strong></p>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/noslouch">noslouch</a> can be found on <a href="https://github.com/noslouch/textgallery">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
