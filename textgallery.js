@@ -266,7 +266,9 @@ function Gallery(container) {
             currentIndex = currentIndex + 1 === getSlides().length ? 0 : currentIndex + 1
             currentSlide = getSlide(currentIndex)
 
-            currentSlide.open()
+            currentTimer = setTimeout(function() {
+                currentSlide.open()
+            }, 1000)
         }
     }
 
