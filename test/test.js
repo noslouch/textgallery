@@ -2,16 +2,16 @@
 'use strict';
 
 QUnit.testStart(function(){
-    window.quotes = document.getElementById('quotes')
+    window.quotes = document.getElementById('container')
     window.g = new Gallery(quotes)
-    window.slides = document.querySelectorAll('#quotes h3')
+    window.slides = document.querySelectorAll('.slide')
     window.slideObj = new Slide( slides[0] )
     window.blinds = document.querySelectorAll('.blind')
 })
 
 test('DOM structure', function(){
-    ok(document.getElementById('quotes'), 'quotes outer wrapper')
-    ok(document.getElementById('qContainer'), 'quotes inner container')
+    //ok(document.getElementById('quotes'), 'quotes outer wrapper')
+    //ok(document.getElementById('qContainer'), 'quotes inner container')
     ok(document.getElementsByClassName('slide').length, 'slides in dom')
 
     Array.prototype.forEach.call(slides, function(slide, idx){
@@ -31,7 +31,7 @@ test('Gallery constructor', function(){
 
 test('Gallery API', function(){
     equal( slides.length, g.getSlides().length, 'getSlides returns proper number of slides' )
-    deepEqual( document.getElementById('quotes'), g.getEl(), 'getEl returns Gallery DOM elements')
+    deepEqual( quotes, g.getEl(), 'getEl returns Gallery DOM elements')
 
     g.getSlides().forEach(function(slide, idx){
         deepEqual( slides[idx], slide.getEl(), 'getSlides returns proper DOM elements')
@@ -92,6 +92,7 @@ asyncTest('Pausing in between slides', function() {
     document.addEventListener('closeslide', closeHandler, false)
     g.play()
 })
+
 test('Slide Created', function(){
     ok(slideObj, 'slide created')
 })
@@ -189,6 +190,7 @@ asyncTest('Slide sends close event', function(){
 })
 
 asyncTest('All Slides send close event once per transition', function(){
+    g.destroy()
     expect(1)
     var closedSlides = 0,
         slideObjs = []
@@ -214,5 +216,5 @@ asyncTest('All Slides send close event once per transition', function(){
             equal(closedSlides, slideObjs.length, 'all slides should be closed after timeout')
             start()
         }, 2000)
-    }, 1000)
+    }, 1500)
 })
