@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link href="./bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="./bower_components/modernizr/modernizr.js"></script>
+
+    <link rel="stylesheet" href="../style.css" />
+    <script type="text/javascript" src="../textgallery.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <button id="play" type="button">Play</button>
+            <button id="pause" type="button">Pause</button>
+        </div>
+        <div class="slides" id="slides">
+            <div class="slide">
+                <div class="blind">Winter is coming</div>
+                <div class="blind">- Eddard Stark</div>
+            </div>
+            <div class="slide">
+                <div class="blind">In the game of thrones,</div>
+                <div class="blind">you win or you die.</div>
+                <div class="blind">- Cersei Lannister</div>
+            </div>
+            <div class="slide">
+                <div class="blind">All these quotes and more</div>
+                <div class="blind">available for a limited time only!</div>
+                <div class="blind"><a href="google.com">Click here for more</a></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        var gallery = new Gallery( document.getElementById('slides') )
+        
+        document.addEventListener('click', function controls(e) {
+            if ( e.target.id === 'play' ) {
+                gallery.play()
+            } else if ( e.target.id === 'pause' ) {
+                gallery.pause()
+            }
+        }, false)
+    </script>
+</body>
+</html>

@@ -4,14 +4,8 @@
     box-sizing: border-box;
 }
 
-header {
-    overflow: auto;
-    background: hsl(155, 75%, 50%);
-}
-
-header .wrapper {
-    width: 50%;
-    float: left;
+.controls {
+    padding-left: 50px;
 }
 
 button {
@@ -20,10 +14,12 @@ button {
     font-size: 1rem;
     width: auto;
 }
-.container {
+
+.slides {
     position: relative;
     height: 500px;
 }
+
 .slide {
     display: flex;
     flex-direction: column;
