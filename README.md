@@ -73,4 +73,6 @@ Browser Compatibility
 Known Bugs
 ----------
 
-**Coming Soon.**
+### Safari
+
+There is a bug in Safari where the browser loses track of the gallery if the window becomes inactive. Inactive means the browser is open but made invisible by viewing another tab, switching screens (on OSX), or other things of that nature.
