@@ -1,0 +1,23 @@
+{
+  "asi" : true,
+  "laxcomma" : true,
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "sub": true,
+  "undef": true,
+  "unused": false,
+  "boss": true,
+  "eqnull": true,
+  "browser": true,
+  "jquery": true,
+  "globalstrict": true,
+  "devel" : true,
+  "globals" : {
+    "define" : true,
+    "require" : true
+  }
+}
