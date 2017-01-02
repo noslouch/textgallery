@@ -464,6 +464,18 @@ function Gallery(container) {
         return isGalleryPlaying
     }
 
+    window.addEventListener('focus', function() {
+        if ( !isPlaying() ) {
+            play()
+        }
+    }, false)
+
+    window.addEventListener('blur', function() {
+        if ( isPlaying() ) {
+            pause()
+        }
+    })
+
     return {
         getEl : getEl.bind(this),
         getCurrentSlide : getCurrentSlide.bind(this),
